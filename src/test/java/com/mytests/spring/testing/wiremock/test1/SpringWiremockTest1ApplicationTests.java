@@ -34,9 +34,9 @@ class SpringWiremockTest1ApplicationTests {
 
     @Test
     public void testAnyMethods() throws Exception {
-        stubFor(any(urlPathEqualTo("/server/basic/str"))  // no url injection
-        //stubFor(any(urlMatching("/server/basic/str")) // no regex injection
-        //stubFor(any(urlPathMatching("/server/basic/str")) // no regex injection
+        stubFor(any(urlPathEqualTo("/server/basic/str"))  // no url injection - https://youtrack.jetbrains.com/issue/IDEA-297648
+        //stubFor(any(urlMatching("/server/basic/str")) // no regex injection - https://youtrack.jetbrains.com/issue/IDEA-297651
+        //stubFor(any(urlPathMatching("/server/basic/str")) // no regex injection - https://youtrack.jetbrains.com/issue/IDEA-297651
         //stubFor(any(urlEqualTo("/server/basic/str")) // ok
 
                 .willReturn(aResponse().withBody("test string")));
@@ -56,9 +56,9 @@ class SpringWiremockTest1ApplicationTests {
     @Test
     public void testMethods() throws Exception {
         //stubFor(request("GET",urlEqualTo("/server/basic/str"))  // ok
-        //stubFor(request("GET",urlPathEqualTo("/server/basic/str"))  // no URL injection
-        //stubFor(request("GET",urlMatching("/server/basic/s.*"))  // no regex injection
-        stubFor(request("GET",urlPathMatching("/server/basic/s.*"))  // no regex injection
+        //stubFor(request("GET",urlPathEqualTo("/server/basic/str"))  // no URL injection - https://youtrack.jetbrains.com/issue/IDEA-297648
+        //stubFor(request("GET",urlMatching("/server/basic/s.*"))  // no regex injection - https://youtrack.jetbrains.com/issue/IDEA-297651
+        stubFor(request("GET",urlPathMatching("/server/basic/s.*"))  // no regex injection - https://youtrack.jetbrains.com/issue/IDEA-297651
 
                 .willReturn(aResponse().withBody("test string")));
         ///
@@ -75,8 +75,8 @@ class SpringWiremockTest1ApplicationTests {
         //stubFor(get("/server/basic/home")   // ok
         //stubFor(get(urlEqualTo("/server/basic/home"))   // ok
         // stubFor(get(urlPathEqualTo("/server/basic/home")) // ok
-        //stubFor(get(urlMatching("/server/basic/h.*")) // no regexp injection
-        stubFor(get(urlPathMatching("/server/basic/h.*")) // no regexp injection
+        //stubFor(get(urlMatching("/server/basic/h.*")) // no regex injection, URL instead - https://youtrack.jetbrains.com/issue/IDEA-297651
+        stubFor(get(urlPathMatching("/server/basic/h.*")) // no regex injection, URL instead - https://youtrack.jetbrains.com/issue/IDEA-297651
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "text/plain")
                         .withBody("Hello!!!!")));
@@ -88,10 +88,10 @@ class SpringWiremockTest1ApplicationTests {
                 .andReturn();
         assertEquals(myresponse.getResponse().getContentAsString(),"Hello!!!!");
         ///
-        verify(1,getRequestedFor(urlPathEqualTo("/server/basic/home"))); // no url injected
+        verify(1,getRequestedFor(urlPathEqualTo("/server/basic/home"))); // no url injection - https://youtrack.jetbrains.com/issue/IDEA-297648
         verify(1, getRequestedFor(urlEqualTo("/server/basic/home")));    // ok
-        verify(1, getRequestedFor(urlMatching("/server/basic/home"))); // no regex
-        verify(1, getRequestedFor(urlPathMatching("/server/basic/home"))); // no regex
+        verify(1, getRequestedFor(urlMatching("/server/b.*/home"))); // no regex injection - https://youtrack.jetbrains.com/issue/IDEA-297651
+        verify(1, getRequestedFor(urlPathMatching("/server/b.*/home"))); // no regex injection - https://youtrack.jetbrains.com/issue/IDEA-297651
 
 
     }
@@ -138,9 +138,9 @@ class SpringWiremockTest1ApplicationTests {
     public void postPOJO_JSONPathMatching() throws Exception {
         stubFor(
                 post(urlEqualTo("/server/pojo/add"))
-                        //.withRequestBody(equalToJson("{\"id\":\"3\",\"name\":\"Ivan\",\"age\":25 }")) //- ok
-                        .withRequestBody(equalToJson("{\"id\":\"3\",\"name\":\"Ivan\",\"age\":25 }",true,true)) //- no injection
-                        .willReturn(okJson("{ \"id\":\"3\",\"name\":\"Ivan\",\"age\":25 }")));
+                        //.withRequestBody(equalToJson("{\"id\":\"3\",\"name\":\"Ivan\",\"age\":25 }")) //  ok
+                        .withRequestBody(equalToJson("{\"id\":\"3\",\"name\":\"Ivan\",\"age\":25 }",true,true)) // no JSON injection - https://youtrack.jetbrains.com/issue/IDEA-297652
+                        .willReturn(okJson("{ \"id\":\"3\",\"name\":\"Ivan\",\"age\":25 }"))); // ok
 
 
         ///
@@ -156,7 +156,7 @@ class SpringWiremockTest1ApplicationTests {
         ///
         verify(1, postRequestedFor(urlEqualTo("/server/pojo/add"))
                 .withRequestBody(matchingJsonPath("$.[?(@.age == 25)]")) // ok
-                .withRequestBody(matchingJsonPath("$..name", containing("Ivan"))) // no jsonpath injection
+                .withRequestBody(matchingJsonPath("$..name", containing("Ivan"))) // no jsonpath injection - https://youtrack.jetbrains.com/issue/IDEA-297654
         );
     }
 
